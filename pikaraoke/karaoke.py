@@ -9,6 +9,7 @@ import shutil
 import socket
 import subprocess
 import time
+import re
 from pathlib import Path
 from queue import Queue
 from subprocess import check_output
@@ -356,7 +357,7 @@ class Karaoke:
             logging.info(message)
             self.send_notification(message, "primary")
 
-    def download_video(self, video_url, enqueue=False, user="Pikaraoke", title=None):
+    def download_video(self, video_url, enqueue=False, user="Pikaraoke", title=None, callback=None):
         displayed_title = title if title else video_url
         # MSG: Message shown after the download is started
         self.log_and_send(_("Downloading video: %s" % displayed_title))
@@ -388,6 +389,9 @@ class Karaoke:
                 else:
                     # MSG: Message shown after the download is completed but the adding to queue fails
                     self.log_and_send(_("Error queueing song: ") + displayed_title, "danger")
+            if callback:
+                # Call the callback function with the title and user
+                callback(title, user, video_url)
         else:
             # MSG: Message shown after the download process is completed but the song is not found
             self.log_and_send(_("Error downloading song: ") + displayed_title, "danger")
@@ -441,6 +445,39 @@ class Karaoke:
             except TypeError:
                 # more fun python 3 hacks
                 rc = rc.split("---".encode("utf-8", "ignore"))[0]
+        return rc
+
+    def filename_from_path_switch(self, file_path, remove_youtube_id=True):
+        rc = os.path.basename(file_path)
+        rc = os.path.splitext(rc)[0]
+        rc = rc.split("---")[0]  # removes youtube id if present
+        if remove_youtube_id:
+            try:
+                rc = rc.split("---")[0]  # removes youtube id if present
+            except TypeError:
+                # more fun python 3 hacks
+                rc = rc.split("---".encode("utf-8", "ignore"))[0]
+
+        channel_pattern = r"\[([^]]+)\]"
+
+        channel = re.search(channel_pattern, rc, re.IGNORECASE)
+
+        match channel.group(1):
+            case "Atomic Karaoke... ":
+                pattern = r"(.+)\s-\s(.+)\s(\(.+\))"
+                replacement = r"\2 - \1 \3"
+                rc = re.sub(pattern, replacement, rc)
+            case "KaraFun Karaoke":
+                pattern = r'^(?:Karaoke\s+)?(.*?)\s*[-｜]\s*(.*?)(?:\s*｜.*?)?\s*-\[KaraFun Karaoke\]$'
+                replacement = r'\2 - \1 [KaraFun]'
+                rc = re.sub(pattern, replacement, rc)
+            case "CoversPH":
+                pattern = r'^([^\-]+) - (.+?)(?:\s*\([^)]*\))?\s*-(\[[^]]+\])'
+                replacement = r'\2 - \1 \3'
+                rc = re.sub(pattern, replacement, rc)
+
+
+
         return rc
 
     def find_song_by_youtube_id(self, youtube_id):

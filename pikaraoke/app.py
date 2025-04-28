@@ -188,6 +188,7 @@ def main():
 
     # Expose some functions to jinja templates
     app.jinja_env.globals.update(filename_from_path=k.filename_from_path)
+    app.jinja_env.globals.update(filename_from_path_switch=k.filename_from_path_switch)
     app.jinja_env.globals.update(url_escape=quote)
 
     k.upgrade_youtubedl()

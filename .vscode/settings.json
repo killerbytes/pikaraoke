@@ -12,5 +12,13 @@
   "[yaml]": {
     "editor.formatOnSave": false
   },
-  "isort.args": ["--profile", "black"]
+  "isort.args": [
+    "--profile",
+    "black"
+  ],
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#2E3002",
+    "titleBar.activeBackground": "#404303",
+    "titleBar.activeForeground": "#FBFDCF"
+  }
 }

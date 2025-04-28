@@ -1,6 +1,7 @@
 import json
 import threading
 
+
 import flask_babel
 from flask import (
     Blueprint,
@@ -9,6 +10,7 @@ from flask import (
     redirect,
     render_template,
     request,
+    jsonify,
     url_for,
 )
 
@@ -67,7 +69,7 @@ def download():
         queue = True
     else:
         queue = False
-
+    print(d)
     # download in the background since this can take a few minutes
     t = threading.Thread(target=k.download_video, args=[song, queue, user, title])
     t.daemon = True
@@ -88,3 +90,42 @@ def download():
         flash_message += _('Song will appear in the "available songs" list.')
     flash(flash_message, "is-info")
     return redirect(url_for("search.search"))
+
+def on_callback(title, user, song):
+    # This function is called when the download is complete
+    # You can add any additional logic here if needed
+    print(f"Download complete for {title} by {user}. Song URL: {song}")
+
+@search_bp.route("/downloads", methods=["POST"])
+def downloads():
+    k = get_karaoke_instance()
+    songs = request.get_json()
+    flash_message = ""
+    t = None
+    for item in songs:
+        title = item.get('song-title')  
+        song = item.get('song-url')
+        user = item.get('song-added-by')
+        queue = False
+        callback= on_callback
+        # download in the background since this can take a few minutes
+        t = threading.Thread(target=k.download_video, args=[song, queue, user, title, callback])
+        t.daemon = True
+        t.start()
+        
+        displayed_title = title if title else song
+        flash_message = (
+            # MSG: Message shown after starting a download. Song title is displayed in the message.
+            _("Download started: %s. This may take a couple of minutes to complete.")
+            % displayed_title
+        )
+
+        if queue:
+            # MSG: Message shown after starting a download that will be adding a song to the queue.
+            flash_message += _("Song will be added to queue.")
+        else:
+            # MSG: Message shown after after starting a download.
+            flash_message += _('Song will appear in the "available songs" list.')
+    flash(flash_message, "is-info")
+    t.join()  # Wait for the thread to finish before continuing
+    return title, 200

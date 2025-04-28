@@ -1,5 +1,4 @@
 import os
-
 import flask_babel
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_paginate import Pagination, get_page_parameter
@@ -35,10 +34,11 @@ def browse():
                     result.append(song)
         else:
             for song in available_songs:
-                f = k.filename_from_path(song).lower()
+                f = k.filename_from_path_switch(song).lower()
                 if f.startswith(letter.lower()):
                     result.append(song)
         available_songs = result
+        print(result)
 
     if "sort" in request.args and request.args["sort"] == "date":
         songs = sorted(available_songs, key=lambda x: os.path.getctime(x))

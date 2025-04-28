@@ -1,0 +1,1 @@
+poetry run pikaraoke --bg-video-path static/video/killerbytes.mp4 --disable-bg-music  --disable-score

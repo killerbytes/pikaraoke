@@ -47,15 +47,21 @@
     top: 3px;
     z-index: 20;
   }
+
   table {
     width: 100%;
-    table-layout: auto; /* Allows columns to adjust based on content */
+    table-layout: auto;
+    /* Allows columns to adjust based on content */
   }
+
   td {
-    word-wrap: break-word; /* Ensures long words break to fit within the cell */
+    word-wrap: break-word;
+    /* Ensures long words break to fit within the cell */
   }
+
   .break-word {
-    word-break: break-all; /* Ensures long words break to fit within the cell */
+    word-break: break-all;
+    /* Ensures long words break to fit within the cell */
   }
 
   @media screen and (max-width: 500px) {
@@ -70,6 +76,7 @@
       max-width: 22px;
       height: 95vh;
     }
+
     .mobile-hide {
       visibility: hidden;
     }
@@ -99,9 +106,7 @@
   <a href="{{ url_for('files.browse') }}?letter=numeric">#</a>
   {% for letter in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
   'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'] %}
-  <a href="{{ url_for('files.browse') }}?letter={{letter}}"
-    >{{letter.upper()}}</a
-  >
+  <a href="{{ url_for('files.browse') }}?letter={{letter}}">{{letter.upper()}}</a>
   {% endfor %}
 </div>
 
@@ -111,23 +116,19 @@
   <tr value="{{ song }}">
     <td style="padding: 5px 0px">{{loop.index + pagination.skip}}</td>
     <td id="{{filename_from_path(song)[0].lower()}}" style="padding-right: 0">
-      <a
-        class="add-song-link has-text-weight-bold has-text-success"
-        title="Add '{{filename_from_path(song)}}' to queue"
-        href="{{url_for('queue.enqueue')}}?song={{url_escape(song.encode('utf-8','surrogateescape'))}}&user="
-        ><i class="icon icon-list-add"></i>
+      <a class="add-song-link has-text-weight-bold has-text-success" title="Add '{{filename_from_path(song)}}' to queue"
+        href="{{url_for('queue.enqueue')}}?song={{url_escape(song.encode('utf-8','surrogateescape'))}}&user="><i
+          class="icon icon-list-add"></i>
       </a>
     </td>
     <td class="break-word" style="padding-right: 0">
-      {{filename_from_path(song)}}
+      {{filename_from_path_switch(song)}}
     </td>
     {% if admin %}
     <td style="padding-right: 0">
-      <a
-        class="edit-button"
+      <a class="edit-button"
         href="{{url_for('files.edit_file')}}?song={{url_escape(song.encode('utf-8','surrogateescape'))}}"
-        title="Edit song"
-        ><i class="icon icon-edit-1"></i>
+        title="Edit song"><i class="icon icon-edit-1"></i>
       </a>
     </td>
     {% endif %} {% endfor %}
